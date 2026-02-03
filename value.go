@@ -19,16 +19,29 @@ func Some[T any](value T) Value[T] {
 	}
 }
 
-func (v *Value[T]) HasValue() bool {
+func None[T any]() Value[T] {
+	var v Value[T]
+	return v
+}
+
+func Map[T, V any](v *Value[T], mapper func(T) V) Value[V] {
+	if v.IsSome() {
+		return Some(mapper(v.value))
+	} else {
+		return None[V]()
+	}
+}
+
+func (v *Value[T]) IsSome() bool {
 	return v != nil && v.hasValue
 }
 
-func (v *Value[T]) IsMissing() bool {
+func (v *Value[T]) IsNone() bool {
 	return v == nil || !v.hasValue
 }
 
 func (v *Value[T]) Get() (T, error) {
-	if v.HasValue() {
+	if v.IsSome() {
 		return v.value, nil
 	} else {
 		var def T
@@ -37,7 +50,7 @@ func (v *Value[T]) Get() (T, error) {
 }
 
 func (v *Value[T]) OrElse(defaultValue T) T {
-	if v.HasValue() {
+	if v.IsSome() {
 		return v.value
 	} else {
 		return defaultValue
@@ -45,7 +58,7 @@ func (v *Value[T]) OrElse(defaultValue T) T {
 }
 
 func (v *Value[T]) String() string {
-	if v.HasValue() {
+	if v.IsSome() {
 		if s, ok := interface{}(v.value).(fmt.Stringer); ok {
 			return fmt.Sprintf("Some(%v)", s.String())
 		} else {
