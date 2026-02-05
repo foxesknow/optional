@@ -2,6 +2,7 @@ package optional
 
 import (
 	"encoding/json"
+	"strconv"
 	"testing"
 )
 
@@ -97,6 +98,38 @@ func TestMap2(t *testing.T) {
 	}
 
 	if v := Map2(None[int](), None[int](), adder); !v.IsNone() {
+		t.Error("should be none")
+	}
+}
+
+func TestBind(t *testing.T) {
+	var stringToInt = func(s string) Value[int] {
+		if i, err := strconv.Atoi(s); err == nil {
+			return Some(i)
+		}
+
+		return None[int]()
+	}
+
+	var intToGreeting = func(i int) Value[string] {
+		if i < 10 {
+			return Some("not bad")
+		}
+
+		return Some("wow")
+	}
+
+	var stringToGreeting = Compose(stringToInt, intToGreeting)
+
+	if Bind(Some("5"), stringToGreeting).MustGet() != "not bad" {
+		t.Error("expected not bad")
+	}
+
+	if Bind(Some("30"), stringToGreeting).MustGet() != "wow" {
+		t.Error("expected wow")
+	}
+
+	if Bind(Some("oops"), stringToGreeting).IsSome() {
 		t.Error("should be none")
 	}
 }

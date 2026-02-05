@@ -48,6 +48,22 @@ func Map2[T1, T2, V any](v1 Value[T1], v2 Value[T2], mapper func(T1, T2) V) Valu
 	return None[V]()
 }
 
+// Performs a bind on the value, allowing you to transform it into another optional
+func Bind[T, R any](v Value[T], mapper func(T) Value[R]) Value[R] {
+	if v.hasValue {
+		return mapper(v.value)
+	}
+
+	return None[R]()
+}
+
+// Returns a new function that takes the return of "f1" and passes it into "f2"
+func Compose[T1, T2, T3 any](f1 func(T1) Value[T2], f2 func(T2) Value[T3]) func(T1) Value[T3] {
+	return func(v1 T1) Value[T3] {
+		return Bind(f1(v1), f2)
+	}
+}
+
 // Returns the inner optional value
 func Unpack[T any](v Value[Value[T]]) Value[T] {
 	return v.value
