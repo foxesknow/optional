@@ -5,6 +5,8 @@ import (
 	"fmt"
 )
 
+// https://fsharp.github.io/fsharp-core-docs/reference/fsharp-core-optionmodule.html
+
 type Value[T any] struct {
 	hasValue bool
 	value    T
@@ -24,7 +26,7 @@ func None[T any]() Value[T] {
 	return v
 }
 
-func Map[T, V any](v *Value[T], mapper func(T) V) Value[V] {
+func Map[T, V any](v Value[T], mapper func(T) V) Value[V] {
 	if v.IsSome() {
 		return Some(mapper(v.value))
 	} else {
@@ -32,15 +34,19 @@ func Map[T, V any](v *Value[T], mapper func(T) V) Value[V] {
 	}
 }
 
-func (v *Value[T]) IsSome() bool {
-	return v != nil && v.hasValue
+func Unpack[T any](v Value[Value[T]]) Value[T] {
+	return v.value
 }
 
-func (v *Value[T]) IsNone() bool {
-	return v == nil || !v.hasValue
+func (v Value[T]) IsSome() bool {
+	return v.hasValue
 }
 
-func (v *Value[T]) Get() (T, error) {
+func (v Value[T]) IsNone() bool {
+	return !v.hasValue
+}
+
+func (v Value[T]) Get() (T, error) {
 	if v.IsSome() {
 		return v.value, nil
 	} else {
@@ -49,7 +55,7 @@ func (v *Value[T]) Get() (T, error) {
 	}
 }
 
-func (v *Value[T]) OrElse(defaultValue T) T {
+func (v Value[T]) OrElse(defaultValue T) T {
 	if v.IsSome() {
 		return v.value
 	} else {
@@ -57,14 +63,26 @@ func (v *Value[T]) OrElse(defaultValue T) T {
 	}
 }
 
-func (v *Value[T]) String() string {
+func (v Value[T]) OrElseWith(factory func() T) T {
 	if v.IsSome() {
-		if s, ok := interface{}(v.value).(fmt.Stringer); ok {
-			return fmt.Sprintf("Some(%v)", s.String())
-		} else {
-			return "Some(...)"
-		}
+		return v.value
 	} else {
-		return "none"
+		return factory()
+	}
+}
+
+func (v Value[T]) ToSlice() []T {
+	if v.IsSome() {
+		return []T{v.value}
+	} else {
+		return []T{}
+	}
+}
+
+func (v Value[T]) String() string {
+	if v.IsSome() {
+		return fmt.Sprintf("Some(%v)", v.value)
+	} else {
+		return "None"
 	}
 }
