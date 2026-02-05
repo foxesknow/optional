@@ -30,6 +30,14 @@ func None[T any]() Value[T] {
 	return v
 }
 
+// / Creates an optional from a pointer. If the pointer is nil then "None" is returned
+func FromPointer[T any](value *T) Value[*T] {
+	return Value[*T]{
+		hasValue: (value != nil),
+		value:    value,
+	}
+}
+
 // Calls the mapper function if "v" contains a value, otherwise returns none.
 func Map[T, R any](v Value[T], mapper func(T) R) Value[R] {
 	if v.hasValue {

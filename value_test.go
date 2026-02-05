@@ -12,6 +12,25 @@ type CustomData struct {
 	Address Value[string] `json:"address"`
 }
 
+func TestFromPointer(t *testing.T) {
+	var nilString *string = nil
+
+	if v := FromPointer(nilString); v.IsSome() {
+		t.Error("value should be none")
+	}
+
+	intPtr := new(int)
+	*intPtr = 99
+	if v := FromPointer(intPtr); v.IsNone() {
+		t.Error("value should be some")
+	} else {
+		i := *v.MustGet()
+		if i != 99 {
+			t.Error("should be 99")
+		}
+	}
+}
+
 func TestDefaultState_None(t *testing.T) {
 	var value Value[int]
 	if value.IsSome() {
