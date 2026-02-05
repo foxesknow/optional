@@ -1,12 +1,14 @@
 package optional
 
 import (
+	"encoding/json"
 	"testing"
 )
 
 type CustomData struct {
-	Name string
-	Age  int
+	Name    string        `json:"name"`
+	Age     int           `json:"age"`
+	Address Value[string] `json:"address"`
 }
 
 func TestDefaultState_None(t *testing.T) {
@@ -52,6 +54,13 @@ func TestGet_NotInitializes(t *testing.T) {
 	if i != 0 {
 		t.Error("should have got 0")
 	}
+}
+
+func TestMustGet_NotInitializes(t *testing.T) {
+	var value Value[int]
+
+	defer func() { recover() }()
+	value.MustGet()
 }
 
 func TestMap_HasValue(t *testing.T) {
@@ -163,5 +172,109 @@ func TestString_Struct(t *testing.T) {
 	v := Some(customData)
 	if s := v.String(); s == "None" {
 		t.Error("expected something")
+	}
+}
+
+func TestJson_Int(t *testing.T) {
+	v := Some(10)
+	b, _ := json.Marshal(v)
+	s := string(b)
+
+	if s != "10" {
+		t.Error("should be 10")
+	}
+
+	var roundTrip Value[int]
+	if err := json.Unmarshal(b, &roundTrip); err != nil {
+		t.Error(err)
+	}
+
+	if i := roundTrip.MustGet(); i != 10 {
+		t.Error("should be 10")
+	}
+}
+
+func TestJson_Int_None(t *testing.T) {
+	v := None[int]()
+	b, _ := json.Marshal(v)
+	s := string(b)
+
+	if s != "null" {
+		t.Error("should be null")
+	}
+
+	var roundTrip Value[int]
+	if err := json.Unmarshal(b, &roundTrip); err != nil {
+		t.Error(err)
+	}
+
+	if !roundTrip.IsNone() {
+		t.Error("should be none")
+	}
+}
+
+func TestJson_EmbeddedInString_None(t *testing.T) {
+	v := CustomData{
+		Name: "Jack",
+		Age:  41,
+	}
+	b, _ := json.Marshal(v)
+
+	var roundTrip CustomData
+	if err := json.Unmarshal(b, &roundTrip); err != nil {
+		t.Error(err)
+	}
+
+	if roundTrip.Address.IsSome() {
+		t.Error("round trip Address should be none")
+	}
+}
+
+func TestJson_EmbeddedInString_Some(t *testing.T) {
+	v := CustomData{
+		Name:    "Jack",
+		Age:     41,
+		Address: Some("The Island"),
+	}
+	b, _ := json.Marshal(v)
+
+	var roundTrip CustomData
+	if err := json.Unmarshal(b, &roundTrip); err != nil {
+		t.Error(err)
+	}
+
+	if address, _ := roundTrip.Address.Get(); address != "The Island" {
+		t.Error("round trip Address is wrong")
+	}
+}
+
+func TestJson_CustomData_Some(t *testing.T) {
+	v := Some(CustomData{
+		Name:    "Jack",
+		Age:     41,
+		Address: Some("The Island"),
+	})
+	b, _ := json.Marshal(v)
+
+	var roundTrip Value[CustomData]
+	if err := json.Unmarshal(b, &roundTrip); err != nil {
+		t.Error(err)
+	}
+
+	if !roundTrip.IsSome() {
+		t.Error("round should be some")
+	}
+
+	value := roundTrip.MustGet()
+	if value.Name != "Jack" {
+		t.Error("expected Jack")
+	}
+
+	if value.Age != 41 {
+		t.Error("expected 10")
+	}
+
+	if value.Address.IsNone() {
+		t.Error("expected Address")
 	}
 }

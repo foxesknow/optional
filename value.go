@@ -1,6 +1,7 @@
 package optional
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 )
@@ -47,7 +48,7 @@ func (v Value[T]) IsNone() bool {
 }
 
 func (v Value[T]) Get() (T, error) {
-	if v.IsSome() {
+	if v.hasValue {
 		return v.value, nil
 	} else {
 		var def T
@@ -55,8 +56,16 @@ func (v Value[T]) Get() (T, error) {
 	}
 }
 
+func (v Value[T]) MustGet() T {
+	if v.hasValue {
+		return v.value
+	}
+
+	panic("no value in optional value")
+}
+
 func (v Value[T]) OrElse(defaultValue T) T {
-	if v.IsSome() {
+	if v.hasValue {
 		return v.value
 	} else {
 		return defaultValue
@@ -64,7 +73,7 @@ func (v Value[T]) OrElse(defaultValue T) T {
 }
 
 func (v Value[T]) OrElseWith(factory func() T) T {
-	if v.IsSome() {
+	if v.hasValue {
 		return v.value
 	} else {
 		return factory()
@@ -72,7 +81,7 @@ func (v Value[T]) OrElseWith(factory func() T) T {
 }
 
 func (v Value[T]) ToSlice() []T {
-	if v.IsSome() {
+	if v.hasValue {
 		return []T{v.value}
 	} else {
 		return []T{}
@@ -80,9 +89,36 @@ func (v Value[T]) ToSlice() []T {
 }
 
 func (v Value[T]) String() string {
-	if v.IsSome() {
+	if v.hasValue {
 		return fmt.Sprintf("Some(%v)", v.value)
 	} else {
 		return "None"
 	}
+}
+
+func (v Value[T]) MarshalJSON() ([]byte, error) {
+	if v.hasValue {
+		return json.Marshal(v.value)
+	}
+
+	return json.Marshal(nil)
+}
+
+func (v *Value[T]) UnmarshalJSON(data []byte) error {
+	if len(data) > 3 && data[0] == 'n' && data[1] == 'u' && data[2] == 'l' && data[3] == 'l' {
+		v.hasValue = false
+		var def T
+		v.value = def
+
+		return nil
+	}
+
+	var value T
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+
+	v.hasValue = true
+	v.value = value
+	return nil
 }
