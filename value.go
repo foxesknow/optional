@@ -30,9 +30,19 @@ func None[T any]() Value[T] {
 	return v
 }
 
-func Map[T, V any](v Value[T], mapper func(T) V) Value[V] {
+// Calls the mapper function if "v" contains a value, otherwise returns none.
+func Map[T, R any](v Value[T], mapper func(T) R) Value[R] {
 	if v.hasValue {
 		return Some(mapper(v.value))
+	} else {
+		return None[R]()
+	}
+}
+
+// Calls the mapper function if "v1" and "v2" contain a value, otherwise returns none.
+func Map2[T1, T2, V any](v1 Value[T1], v2 Value[T2], mapper func(T1, T2) V) Value[V] {
+	if v1.hasValue && v2.hasValue {
+		return Some(mapper(v1.value, v2.value))
 	} else {
 		return None[V]()
 	}

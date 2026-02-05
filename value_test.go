@@ -81,6 +81,26 @@ func TestMap_NoValue(t *testing.T) {
 	}
 }
 
+func TestMap2(t *testing.T) {
+	adder := func(v1 int, v2 int) int { return v1 + v2 }
+
+	if v := Map2(Some(1), Some(2), adder); v.MustGet() != 3 {
+		t.Error("should have 3")
+	}
+
+	if v := Map2(Some(1), None[int](), adder); !v.IsNone() {
+		t.Error("should be none")
+	}
+
+	if v := Map2(None[int](), Some(1), adder); !v.IsNone() {
+		t.Error("should be none")
+	}
+
+	if v := Map2(None[int](), None[int](), adder); !v.IsNone() {
+		t.Error("should be none")
+	}
+}
+
 func TestUnpack_NoValue(t *testing.T) {
 	var v Value[Value[int]]
 
