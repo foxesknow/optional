@@ -129,7 +129,7 @@ func (v Value[T]) MarshalJSON() ([]byte, error) {
 
 // Populates a value from json
 func (v *Value[T]) UnmarshalJSON(data []byte) error {
-	if len(data) > 3 && data[0] == 'n' && data[1] == 'u' && data[2] == 'l' && data[3] == 'l' {
+	if len(data) == 4 && data[0] == 'n' && data[1] == 'u' && data[2] == 'l' && data[3] == 'l' {
 		v.hasValue = false
 		var def T
 		v.value = def
