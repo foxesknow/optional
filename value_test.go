@@ -52,9 +52,9 @@ func TestGet_HasValue(t *testing.T) {
 		t.Error("value is not none")
 	}
 
-	i, err := value.Get()
+	i, hasValue := value.Get()
 
-	if err != nil {
+	if !hasValue {
 		t.Error("error should be nil")
 	}
 
@@ -65,10 +65,10 @@ func TestGet_HasValue(t *testing.T) {
 
 func TestGet_NotInitializes(t *testing.T) {
 	var value Value[int]
-	i, err := value.Get()
+	i, hasValue := value.Get()
 
-	if err == nil {
-		t.Error("error should not be nil")
+	if hasValue {
+		t.Error("shouldnt have a value")
 	}
 
 	if i != 0 {

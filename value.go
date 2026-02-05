@@ -2,7 +2,6 @@ package optional
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 )
 
@@ -13,8 +12,6 @@ type Value[T any] struct {
 	hasValue bool
 	value    T
 }
-
-var noValue = errors.New("no value")
 
 // Creates an optional value that has a value
 func Some[T any](value T) Value[T] {
@@ -88,13 +85,13 @@ func (v Value[T]) IsNone() bool {
 }
 
 // Attempts to get the value held in the optional value
-func (v Value[T]) Get() (T, error) {
+func (v Value[T]) Get() (T, bool) {
 	if v.hasValue {
-		return v.value, nil
+		return v.value, true
 	}
 
 	var def T
-	return def, noValue
+	return def, false
 }
 
 // Returns the value held in the optional. If there is no value then panic.
