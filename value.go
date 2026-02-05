@@ -34,18 +34,18 @@ func None[T any]() Value[T] {
 func Map[T, R any](v Value[T], mapper func(T) R) Value[R] {
 	if v.hasValue {
 		return Some(mapper(v.value))
-	} else {
-		return None[R]()
 	}
+
+	return None[R]()
 }
 
 // Calls the mapper function if "v1" and "v2" contain a value, otherwise returns none.
 func Map2[T1, T2, V any](v1 Value[T1], v2 Value[T2], mapper func(T1, T2) V) Value[V] {
 	if v1.hasValue && v2.hasValue {
 		return Some(mapper(v1.value, v2.value))
-	} else {
-		return None[V]()
 	}
+
+	return None[V]()
 }
 
 // Returns the inner optional value
@@ -67,10 +67,10 @@ func (v Value[T]) IsNone() bool {
 func (v Value[T]) Get() (T, error) {
 	if v.hasValue {
 		return v.value, nil
-	} else {
-		var def T
-		return def, noValue
 	}
+
+	var def T
+	return def, noValue
 }
 
 // Returns the value held in the optional. If there is no value then panic.
@@ -86,36 +86,36 @@ func (v Value[T]) MustGet() T {
 func (v Value[T]) OrElse(defaultValue T) T {
 	if v.hasValue {
 		return v.value
-	} else {
-		return defaultValue
 	}
+
+	return defaultValue
 }
 
 // Returns the value if held. If there is no value then calls the factory function to create a value
 func (v Value[T]) OrElseWith(factory func() T) T {
 	if v.hasValue {
 		return v.value
-	} else {
-		return factory()
 	}
+
+	return factory()
 }
 
 // Returns a slice containing the value. If no value then an empty slice is returned.
 func (v Value[T]) ToSlice() []T {
 	if v.hasValue {
 		return []T{v.value}
-	} else {
-		return []T{}
 	}
+
+	return []T{}
 }
 
 // Returns the optional value as a string
 func (v Value[T]) String() string {
 	if v.hasValue {
 		return fmt.Sprintf("Some(%v)", v.value)
-	} else {
-		return "None"
 	}
+
+	return "None"
 }
 
 // Marshals the optional value to json. If there is no value then `null` is written to the json
