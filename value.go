@@ -63,7 +63,7 @@ func (v Value[T]) Get() (T, error) {
 	}
 }
 
-// Returns the value held in the optional. If there is no value the panic.
+// Returns the value held in the optional. If there is no value then panic.
 func (v Value[T]) MustGet() T {
 	if v.hasValue {
 		return v.value
@@ -135,4 +135,11 @@ func (v *Value[T]) UnmarshalJSON(data []byte) error {
 	v.hasValue = true
 	v.value = value
 	return nil
+}
+
+// Allows for ranged iteration. If there is no value then no iteration takes place
+func (v Value[T]) Iterate(yield func(T) bool) {
+	if v.hasValue {
+		yield(v.value)
+	}
 }

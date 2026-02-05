@@ -278,3 +278,35 @@ func TestJson_CustomData_Some(t *testing.T) {
 		t.Error("expected Address")
 	}
 }
+
+func TestJson_Iterate_Some(t *testing.T) {
+	total := 100
+	v := Some(5)
+
+	for i := range v.Iterate {
+		total += i
+	}
+
+	if total != 105 {
+		t.Error("expected 105")
+	}
+}
+
+func TestJson_Iterate_None(t *testing.T) {
+	total := 100
+	v := None[int]()
+	looped := false
+
+	for i := range v.Iterate {
+		total += i
+		looped = true
+	}
+
+	if looped {
+		t.Error("should not have iterated")
+	}
+
+	if total != 100 {
+		t.Error("expected 100")
+	}
+}
