@@ -51,3 +51,43 @@ func StringToInt(s string) optional.Value[int] {
 	return optional.None[int]()
 }
 ```
+
+### Json
+Json is fully supported. An `optional.Value` that is none will be written to Json as `null`.
+If it was a value then that value will be written as `Json`
+
+```go
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/foxesknow/optional"
+)
+
+type CustomData struct {
+	Name    string                 `json:"name"`
+	Age     int                    `json:"age"`
+	Address optional.Value[string] `json:"address"`
+}
+
+func main() {
+	jack := CustomData{
+		Name: "Jack",
+		Age:  41,
+	}
+
+	jackBytes, _ := json.Marshal(jack)
+	fmt.Println(string(jackBytes))
+
+	kate := CustomData{
+		Name:    "Kate",
+		Age:     37,
+		Address: optional.Some("The Island"),
+	}
+
+	kateBytes, _ := json.Marshal(kate)
+	fmt.Println(string(kateBytes))
+}
+```

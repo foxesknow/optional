@@ -27,7 +27,7 @@ func None[T any]() Value[T] {
 	return v
 }
 
-// / Creates an optional from a pointer. If the pointer is nil then "None" is returned
+// Creates an optional from a pointer. If the pointer is nil then "None" is returned
 func FromPointer[T any](value *T) Value[*T] {
 	return Value[*T]{
 		hasValue: (value != nil),
