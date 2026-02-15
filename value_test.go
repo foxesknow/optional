@@ -2,6 +2,7 @@ package optional
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"testing"
 )
@@ -10,6 +11,12 @@ type CustomData struct {
 	Name    string        `json:"name"`
 	Age     int           `json:"age"`
 	Address Value[string] `json:"address"`
+}
+
+func TestCheckInterfaces(t *testing.T) {
+	var _ fmt.Stringer = (*Value[int])(nil)
+	var _ json.Marshaler = (*Value[int])(nil)
+	var _ json.Unmarshaler = (*Value[int])(nil)
 }
 
 func TestFromPointer(t *testing.T) {
